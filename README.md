@@ -1,20 +1,56 @@
-# cli-lib
-Command Line Interface library, for developing CLI applications and games in C. It has functions to access keyboard, screen and manage timing tasks.
+# 🎮 Projeto de Jogo em C
 
-## Requirements
-- This library works with the follwing OS:
-   - Linux based (Ubuntu, etc)
-   - MacOS
-- It is necessary to have GCC installed.
+Bem-vindo ao repositório do nosso projeto desenvolvido em **C**, como parte da disciplina **Programação Imperativa e Funcional - 2025.2** da **CESAR School**.  
+Este projeto tem como objetivo aplicar os conceitos fundamentais da linguagem C, explorando estruturas de controle, funções, modularização e interação via terminal.
 
-## Usage 
-The file `main.c` has an example of how to use the Keyboard, Screen nd Timer functions. 
+---
 
-To build this example via command line, just switch to library root directory and type the following command:
-```
-$ gcc ./src/*.c -I./include -o cli-lib-example
-```
+## 🧠 Sobre o Projeto
 
-To use this library to create your own apps, simply add source and header files to your project and compile it together with your own code, 
-replacing the main.c file to your own.
+Este jogo foi desenvolvido com base em programação imperativa e funcional, utilizando a biblioteca **CLI-lib** para interface com o terminal.  
+Nosso foco é proporcionar uma experiência leve e divertida, aliando lógica, criatividade e nostalgia.
 
+---
+
+## 🧩 Tecnologias e Ferramentas
+
+- **Linguagem:** C
+- **Biblioteca CLI:** [CLI-lib](https://github.com/tgfb/cli-lib.git)
+- **Editor sugerido:** VS Code
+- **Sistema operacional:** compatível com Windows, Linux e macOS
+
+---
+
+## 👥 Equipe de Desenvolvimento
+
+| Nome Completo   | Usuário no GitHub                                  |
+| --------------- | -------------------------------------------------- |
+| Pedro Iranildo  | [@Devpedrois](https://github.com/devpedrois)       |
+| Gabriel Barbosa | [@GazeT3](https://github.com/GazeT3)               |
+| Diogo Silas     | [@ildevdio](https://github.com/ildevdio)           |
+| Rafael Aimbere  | [@codeblack2301](https://github.com/codeblack2301) |
+| Gabriela Bayo   | [@gabibayo](https://github.com/gabibayo)           |
+| João Vinicius   | [@sucogelad0](https://github.com/sucogelad0)       |
+
+---
+
+## 🏫 Informações Acadêmicas
+
+- **Disciplina:** Programação Imperativa e Funcional - 2025.2
+- **Instituição:** CESAR School
+
+---
+
+## 🧰 Como Executar o Projeto
+
+1. **Clone este repositório:**
+
+   ```bash
+   git clone https://github.com/devpedrois/PROJETO-PIF.git
+
+   ```
+
+2. **Baixe a biblioteca CLI-lib:**
+   ```bash
+   git clone https://github.com/tgfb/cli-lib.git
+   ```
