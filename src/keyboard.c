@@ -1,18 +1,42 @@
 /**
- * keyboard.h
- * Created on Aug, 23th 2023
- * Author: Tiago Barros
- * Based on "From C to C++ course - 2002"
-*/
+ * keyboard.c
+ * Versão compatível com Linux (termios) e Windows (conio.h)
+ * Baseado em Tiago Barros - adaptado
+ */
+
+#include "keyboard.h"
+
+#ifdef _WIN32   // ===== IMPLEMENTAÇÃO WINDOWS =====
+
+#include <conio.h>
+
+void keyboardInit()
+{
+    // No Windows, não precisamos configurar o terminal
+}
+
+void keyboardDestroy()
+{
+    // Nada a fazer
+}
+
+int keyhit()
+{
+    return _kbhit();
+}
+
+int readch()
+{
+    return _getch();
+}
+
+#else           // ===== IMPLEMENTAÇÃO LINUX / UNIX =====
 
 #include <termios.h>
 #include <unistd.h>
 
-#include "keyboard.h"
-
 static struct termios initialSettings, newSettings;
-static int peekCharacter;
-
+static int peekCharacter = -1;
 
 void keyboardInit()
 {
@@ -66,3 +90,5 @@ int readch()
     read(0,&ch,1);
     return ch;
 }
+
+#endif // _WIN32
