@@ -18,26 +18,27 @@ static void game_init_state(GameState *g) {
     g->maxY = SCRENDY;
 
     // Raquete na direita
-    g->paddleX      = g->maxX - 2;
+    g->paddleX = g->maxX - 2;
     g->paddleHeight = PADDLE_HEIGHT;
-    g->paddleY      = (g->minY + g->maxY) / 2 - g->paddleHeight / 2;
-    g->prevPaddleY  = g->paddleY;
+    g->paddleY = (g->minY + g->maxY) / 2 - g->paddleHeight / 2;
+    g->prevPaddleY = g->paddleY;
 
     // Lógica inicial
     g->logicState.p = 1;
     g->logicState.q = 1;
     g->logicState.r = 0;
 
-    g->formula = logic_create_example_formula();
+    // Sistema de fórmulas
+    logic_init_formulas();
+    g->formula = logic_get_current_formula();
 
     g->ranking = ranking_create(RANKING_SIZE);
     g->currentScore = 0;
-
     g->running = 1;
 
     // Bola começa no centro
-    g->ballX  = (g->minX + g->maxX) / 2.0f;
-    g->ballY  = (g->minY + g->maxY) / 2.0f;
+    g->ballX = (g->minX + g->maxX) / 2.0f;
+    g->ballY = (g->minY + g->maxY) / 2.0f;
     g->ballVX = BALL_SPEED_X;
     g->ballVY = BALL_SPEED_Y;
     g->prevBallX = g->ballX;
@@ -46,8 +47,8 @@ static void game_init_state(GameState *g) {
 
 static void game_reset_ball(GameState *g) {
     // NÃO mexe em prevBallX/prevBallY aqui!
-    g->ballX  = (g->minX + g->maxX) / 2.0f;
-    g->ballY  = (g->minY + g->maxY) / 2.0f;
+    g->ballX = (g->minX + g->maxX) / 2.0f;
+    g->ballY = (g->minY + g->maxY) / 2.0f;
     g->ballVX = BALL_SPEED_X;
     g->ballVY = BALL_SPEED_Y;
 }
@@ -62,7 +63,7 @@ static void game_update_ball(GameState *g) {
     g->ballX += g->ballVX;
     g->ballY += g->ballVY;
 
-    // Rebote no topo
+   // Rebote no topo
     if (g->ballY <= g->minY + 1) {
         g->ballY = g->minY + 1;
         g->ballVY = -g->ballVY;
@@ -102,9 +103,13 @@ static void game_handle_collisions(GameState *g) {
         if (res == BOOL_TRUE) {
             g->ballVX = -g->ballVX;
             g->currentScore += 1;
+            logic_cycle_formula();
+            g->formula = logic_get_current_formula();
         } else {
             ranking_add_score(g->ranking, g->currentScore);
             g->currentScore = 0;
+            logic_cycle_formula();
+            g->formula = logic_get_current_formula();
             game_reset_ball(g);
         }
     }
@@ -113,6 +118,8 @@ static void game_handle_collisions(GameState *g) {
     if ((int)g->ballX > g->maxX + 1) {
         ranking_add_score(g->ranking, g->currentScore);
         g->currentScore = 0;
+        logic_cycle_formula();
+        g->formula = logic_get_current_formula();
         game_reset_ball(g);
     }
 }
@@ -165,7 +172,7 @@ static void game_handle_input(GameState *g) {
 // desenha HUD + campo + bola + raquete
 static void game_draw(const GameState *g) {
 
-    // HUD
+    // HUD    
     BoolVal res = logic_eval(g->formula, &g->logicState);
 
     screenSetColor(WHITE, BLACK);
@@ -173,7 +180,10 @@ static void game_draw(const GameState *g) {
     printf("PONG LOGICO");
 
     screenGotoxy(SCRSTARTX + 1, SCRSTARTY + 1);
-    printf("Formula: %s", logic_get_formula_string());
+    printf("Formula %d/%d: %s", 
+           logic_get_current_formula_index() + 1, 
+           logic_get_formula_count(),
+           logic_get_current_formula_string());
 
     screenGotoxy(SCRSTARTX + 1, SCRSTARTY + 2);
     printf("P=%d  Q=%d  R=%d", g->logicState.p, g->logicState.q, g->logicState.r);
@@ -192,10 +202,13 @@ static void game_draw(const GameState *g) {
     printf("Score atual: %d", g->currentScore);
 
     screenGotoxy(SCRSTARTX + 1, SCRSTARTY + 5);
-    printf("[W/S] Mover  [1/2/3] P,Q,R  [Q] Sair");
+    printf("[W/S] Mover  [1/2/3] Alternar P,Q,R");
 
-    // Ranking (lado esquerdo inferior)
-    ranking_draw(g->ranking, SCRSTARTX + 1, SCRSTARTY + 7);
+    screenGotoxy(SCRSTARTX + 1, SCRSTARTY + 6);
+    printf("[R] Reset  [Q] Sair");
+
+   // Ranking (lado esquerdo inferior)
+    ranking_draw(g->ranking, SCRSTARTX + 1, SCRSTARTY + 8);
 
 // --- LIMPA COLUNA DA RAQUETE INTEIRA ---
     screenSetColor(BLACK, BLACK);
@@ -204,7 +217,7 @@ static void game_draw(const GameState *g) {
         printf(" ");
     }
 
-    // --- APAGA BOLA ANTIGA ---
+   // --- APAGA BOLA ANTIGA ---
     screenGotoxy((int)g->prevBallX, (int)g->prevBallY);
     printf(" ");
 
@@ -244,9 +257,8 @@ void game_run(void) {
         }
     }
 
-    logic_free(g.formula);
+    logic_free_formulas();
     ranking_free(g.ranking);
-
     keyboardDestroy();
     screenDestroy();
     timerDestroy();

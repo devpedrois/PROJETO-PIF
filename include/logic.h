@@ -3,17 +3,26 @@
 
 #include "types.h"
 
-// Árvore de expressão lógica
 typedef struct Expr Expr;
 
-// Cria a fórmula de exemplo: P -> Q
-Expr *logic_create_example_formula(void);
+// Estrutura para representar uma fórmula
+typedef struct {
+    Expr *expr;        // Árvore da expressão para cálculo
+    const char *str;   // String para exibição
+} Formula;
 
-// Avalia ϕ(P,Q,R) retornando BOOL_TRUE / BOOL_FALSE
+// Sistema de múltiplas fórmulas
+void logic_init_formulas(void);
+Expr *logic_get_current_formula(void);
+const char *logic_get_current_formula_string(void);
+void logic_cycle_formula(void);
+void logic_set_formula(int index);
+int logic_get_formula_count(void);
+int logic_get_current_formula_index(void);
+void logic_free_formulas(void);
+
+// Funções de avaliação
 BoolVal logic_eval(const Expr *expr, const LogicState *state);
-
-// Retorna uma string legível da fórmula (para HUD)
-const char *logic_get_formula_string(void);
 
 // Libera a árvore recursivamente
 void logic_free(Expr *expr);
