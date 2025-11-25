@@ -1,6 +1,17 @@
 #include <stdlib.h>
 #include "logic.h"
 
+// Gera P, Q, R aleatórios até que a fórmula seja falsa
+void logic_randomize_state_false(LogicState *state, Expr *expr) {
+    if (!state || !expr) return;
+
+    do {
+        state->p = rand() % 2;
+        state->q = rand() % 2;
+        state->r = rand() % 2;
+    } while (logic_eval(expr, state) == BOOL_TRUE);
+}
+
 // Tipos de nó
 typedef enum {
     OP_VAR_P,
@@ -20,12 +31,30 @@ struct Expr {
 };
 
 // ---------- Sistema de múltiplas fórmulas ----------
+#define MAX_FORMULAS 10
 
-static Formula formulas[8];
-static int currentFormulaIndex = 0;
-static int totalFormulas = 8;
+static Formula formulas[MAX_FORMULAS];
+static int order[MAX_FORMULAS];       // ordem embaralhada das fórmulas
+static int currentFormulaIndex = 0;   // posição 0..9
+static int totalFormulas = 10;        
 
 // ---------- helpers internos ----------
+
+// embaralha a ordem das fórmulas (0..totalFormulas-1)
+static void logic_shuffle_order(void) {
+    // inicializa ordem sequencial
+    for (int i = 0; i < totalFormulas; ++i) {
+        order[i] = i;
+    }
+
+    // Fisher-Yates
+    for (int i = totalFormulas - 1; i > 0; --i) {
+        int j = rand() % (i + 1);
+        int tmp  = order[i];
+        order[i] = order[j];
+        order[j] = tmp;
+    }
+}
 
 static Expr *expr_new(OpType op, Expr *left, Expr *right) {
     Expr *e = (Expr *)malloc(sizeof(Expr));
@@ -157,60 +186,105 @@ static Expr* create_formula_8() {
     return expr_new(OP_AND, not_p_or_r, q);
 }
 
+static Expr* create_formula_9() {
+    // (P -> Q) /\ (Q -> R)
+    Expr *p = expr_new(OP_VAR_P, NULL, NULL);
+    Expr *q1 = expr_new(OP_VAR_Q, NULL, NULL);
+    Expr *impl1 = expr_new(OP_IMPLIES, p, q1);
+
+    Expr *q2 = expr_new(OP_VAR_Q, NULL, NULL);
+    Expr *r  = expr_new(OP_VAR_R, NULL, NULL);
+    Expr *impl2 = expr_new(OP_IMPLIES, q2, r);
+
+    return expr_new(OP_AND, impl1, impl2);
+}
+
+static Expr* create_formula_10() {
+    // (P /\ ~Q) V (~P /\ R)
+    Expr *p1   = expr_new(OP_VAR_P, NULL, NULL);
+    Expr *not_q = expr_new(OP_NOT, expr_new(OP_VAR_Q, NULL, NULL), NULL);
+    Expr *p_and_not_q = expr_new(OP_AND, p1, not_q);
+
+    Expr *not_p = expr_new(OP_NOT, expr_new(OP_VAR_P, NULL, NULL), NULL);
+    Expr *r     = expr_new(OP_VAR_R, NULL, NULL);
+    Expr *not_p_and_r = expr_new(OP_AND, not_p, r);
+
+    return expr_new(OP_OR, p_and_not_q, not_p_and_r);
+}
+
 // ---------- API Pública do Sistema de Fórmulas ----------
 
 void logic_init_formulas(void) {
     // Inicializa fórmula 1: P → Q
     formulas[0].expr = create_formula_1();
-    formulas[0].str = "P → Q";
+    formulas[0].str  = "P -> Q";
     
     // Inicializa fórmula 2: P ∧ Q
     formulas[1].expr = create_formula_2();
-    formulas[1].str = "P ∧ Q";
+    formulas[1].str  = "P /\\ Q";
     
     // Inicializa fórmula 3: P ∨ Q
     formulas[2].expr = create_formula_3();
-    formulas[2].str = "P ∨ Q";
+    formulas[2].str  = "P V Q";
     
     // Inicializa fórmula 4: ¬P
     formulas[3].expr = create_formula_4();
-    formulas[3].str = "¬P";
+    formulas[3].str  = "~P";
     
     // Inicializa fórmula 5: (P ∧ Q) → R
     formulas[4].expr = create_formula_5();
-    formulas[4].str = "(P ∧ Q) → R";
+    formulas[4].str  = "(P /\\ Q) -> R";
     
     // Nova fórmula 6: ¬P ∧ ¬Q
     formulas[5].expr = create_formula_6();
-    formulas[5].str = "¬P ∧ ¬Q";
+    formulas[5].str  = "~P /\\ ~Q";
 
     // Nova fórmula 7: P ∨ ¬Q
     formulas[6].expr = create_formula_7();
-    formulas[6].str = "P ∨ ¬Q";
+    formulas[6].str  = "P V ~Q";
 
     // Nova fórmula 8: ¬(P ∨ R) ∧ Q
     formulas[7].expr = create_formula_8();
-    formulas[7].str = "¬(P ∨ R) ∧ Q";
+    formulas[7].str  = "~(P V R) /\\ Q";
 
+    // Nova fórmula 9: (P -> Q) /\ (Q -> R)
+    formulas[8].expr = create_formula_9();
+    formulas[8].str  = "(P -> Q) /\\ (Q -> R)";
+
+    // Nova fórmula 10: (P -> Q) /\ (Q -> R)
+    formulas[9].expr = create_formula_10();
+    formulas[9].str  = "(P /\\ ~Q) V (~P /\\ R)";
+
+    // começa sempre da posição 0 do ciclo
     currentFormulaIndex = 0;  
+    // sorteia ordem inicial das fórmulas
+    logic_shuffle_order();
 }
 
 Expr *logic_get_current_formula(void) {
     if (currentFormulaIndex >= 0 && currentFormulaIndex < totalFormulas) {
-        return formulas[currentFormulaIndex].expr;
+        int idx = order[currentFormulaIndex];
+        return formulas[idx].expr;
     }
     return NULL;
 }
 
 const char *logic_get_current_formula_string(void) {
     if (currentFormulaIndex >= 0 && currentFormulaIndex < totalFormulas) {
-        return formulas[currentFormulaIndex].str;
+        int idx = order[currentFormulaIndex];
+        return formulas[idx].str;
     }
     return "Formula invalida";
 }
 
 void logic_cycle_formula(void) {
-    currentFormulaIndex = (currentFormulaIndex + 1) % totalFormulas;
+    currentFormulaIndex++;
+
+    // terminou ciclo (fez as 10)
+    if (currentFormulaIndex >= totalFormulas) {
+        currentFormulaIndex = 0;  
+        logic_shuffle_order();   // NOVA ORDEM
+    }
 }
 
 void logic_set_formula(int index) {

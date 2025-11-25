@@ -20,6 +20,7 @@ void logic_set_formula(int index);
 int logic_get_formula_count(void);
 int logic_get_current_formula_index(void);
 void logic_free_formulas(void);
+void logic_randomize_state_false(LogicState *state, Expr *expr);
 
 // Funções de avaliação
 BoolVal logic_eval(const Expr *expr, const LogicState *state);

@@ -24,14 +24,19 @@ typedef struct {
     float ballVY;
     float prevBallX;
     float prevBallY;
+    float speedMultiplier;
 
     // Lógica proposicional
     LogicState logicState;
     Expr      *formula;
 
-    // Pontuação e ranking
-    int      currentScore;
-    Ranking *ranking;
+    // Pontuação
+    int  currentScore;       // score atual (combo)
+    int  bestScore;          // melhor score dessa "sessão" do jogador
+
+    // Jogador
+    char    playerName[RANKING_MAX_NAME + 1];
+    Ranking *ranking;        // ranking global (top 5)
 
     int running; // 1 enquanto jogo ativo
 } GameState;

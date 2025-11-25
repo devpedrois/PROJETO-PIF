@@ -1,18 +1,30 @@
 #ifndef RANKING_H
 #define RANKING_H
 
-// Estrutura do ranking (top 5)
+// tamanho máximo do nome do jogador (sem o '\0')
+#define RANKING_MAX_NAME 20
+
+// Uma entrada do ranking: nome + melhor score
 typedef struct {
-    int  capacity; // capacidade máxima
-    int  count;    // elementos válidos
-    int *scores;   // vetor dinâmico
+    char name[RANKING_MAX_NAME + 1];
+    int  score;
+} RankingEntry;
+
+// Estrutura do ranking (top N jogadores)
+typedef struct {
+    int capacity;        // capacidade máxima (ex.: 5)
+    int count;           // quantos estão ocupados
+    RankingEntry *entries;
 } Ranking;
 
 // Cria ranking com "capacity" posições (ex.: 5)
 Ranking *ranking_create(int capacity);
 
-// Adiciona um score ao ranking (ordem decrescente usando recursão)
-void ranking_add_score(Ranking *ranking, int score);
+// Registra/atualiza a melhor pontuação de um jogador.
+// - Se o jogador já existe e o novo score for maior, atualiza.
+// - Se não existe, tenta inseri-lo mantendo ordem decrescente.
+// - Usa recursão pra ordenar internamente.
+void ranking_add_or_update(Ranking *ranking, const char *name, int score);
 
 // Desenha o ranking numa área da tela
 void ranking_draw(const Ranking *ranking, int startX, int startY);
