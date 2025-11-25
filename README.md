@@ -1,24 +1,43 @@
-# 🎮 Projeto de Jogo em C
+# 🎮 LogicPong
 
-Bem-vindo ao repositório do nosso projeto desenvolvido em **C**, como parte da disciplina **Programação Imperativa e Funcional - 2025.2** da **CESAR School**.  
+Bem-vindo ao repositório do LogicPong, jogo desenvolvido em C como parte da disciplina **Programação Imperativa e Funcional - 2025.2** da **CESAR School**.  
 Este projeto tem como objetivo aplicar os conceitos fundamentais da linguagem C, explorando estruturas de controle, funções, modularização e interação via terminal.
 
 ---
 
 ## 🧠 Sobre o Projeto
 
-Este jogo foi desenvolvido com base em conceitos de programação imperativa e funcional, utilizando a biblioteca CLI-lib para interface com o terminal. Nosso objetivo foi criar um jogo leve, acessível e engajador, que integrasse jogabilidade retrô com o conteúdo de lógica proposicional, garantindo clareza e aplicabilidade prática.
+O LogicPong foi pensado para unir:
+
+- Jogabilidade retrô (estilo Pong, no terminal);
+
+- Lógica proposicional, com fórmulas envolvendo P, Q e R;
+
+- Prática de programação em C, usando a biblioteca CLI-lib para desenhar no terminal.
+
+O foco é ser um jogo leve, acessível e didático: enquanto você tenta rebater a bolinha, precisa raciocinar sobre o valor lógico das proposições.
 
 ---
 
 ## 🧱 O Jogo: Pong Lógico
 
 # 🎯 Descrição Geral
-O Pong Lógico é uma versão educativa do clássico Pong, combinando ação simples com raciocínio lógico. O jogador controla uma raquete e deve rebater a bola, mas ela só será rebatida se a proposição lógica exibida no topo da tela for verdadeira, com base nos valores atuais de P, Q e R. A jogabilidade une reflexo e lógica, tornando o aprendizado de proposições algo natural, visual e divertido.
+O LogicPong é uma versão educativa do clássico Pong, combinando ação simples com raciocínio lógico. O jogador controla uma raquete e deve rebater a bola, mas ela só será rebatida se a proposição lógica exibida no topo da tela for verdadeira, com base nos valores atuais de P, Q e R. A jogabilidade une reflexo e lógica, tornando o aprendizado de proposições algo natural, visual e divertido.
 
 ---
 
-# ⚙️ Mecânica do Jogo
+# ⚙️ Regras / Mecânica
+
+O jogo percorre um conjunto de 10 fórmulas lógicas envolvendo P, Q e R.
+
+A ordem das fórmulas é embaralhada de tempos em tempos, para evitar que o jogador decore sempre a mesma sequência.
+
+Cada vez que você rebate a bola com a fórmula VERDADEIRA, você ganha +1 ponto e a bola fica um pouco mais rápida.
+
+Se você errar (fórmula falsa ou deixar a bola passar):
+- Seu combo atual volta para zero.
+- A bola é reposicionada no campo.
+- Seu melhor combo daquela partida é salvo com o seu nome no ranking global (top 5), se estiver entre as maiores pontuações.
 
 # 🎮 Objetivo
 Manter a bola em jogo o maior tempo possível, garantindo que a fórmula lógica (ϕ) seja verdadeira sempre que a bola encostar na raquete e acumular pontos. Se a proposição for falsa, a bola atravessa a raquete e o jogador perde ponto ou vida.
@@ -55,7 +74,10 @@ Obs: Se o jogador mudar Q para 1, o resultado se torna VERDADEIRO, e a bola volt
    ```
 
 ## 📊 Elementos da Tela (HUD)
-- Fórmula lógica atual (ϕ)
+
+- Nome do jogador
+  
+- Número e texto da fórmula atual (ex: Formula 3/10: ~(P V R) /\ Q)
 
 - Valores de P, Q e R
 
@@ -65,7 +87,9 @@ Obs: Se o jogador mudar Q para 1, o resultado se torna VERDADEIRO, e a bola volt
 
 ❌ FALSO (vermelho)
 
-- Pontuação
+- Score atual (combo da rodada)
+
+- Melhor score dessa partida
  
 - Bola e raquete, renderizadas no terminal via CLI-lib
 
@@ -75,7 +99,7 @@ O jogo possui um sistema simples e competitivo de pontuação:
 
    ```bash
   ✔️ Quando ganha ponto:
-A cada rebatida correta, ou seja, quando:
++1 ponto a cada rebatida com a expressão VERDADEIRA. Ou seja, quando:
 
 A bola encosta na raquete e
 
@@ -85,21 +109,25 @@ A proposição lógica atual (ϕ) está VERDADEIRA
    ```
 
    ```bash
-   ❌ Quando perde tudo:
-Se a proposição estiver FALSA no momento da colisão,
+   ❌ Se a expressão for FALSA na hora da colisão (ou a bola passar direto):
+O combo atual volta para 0.
 
-A bola atravessa a raquete
+A melhor pontuação dessa sessão é atualizada, se for maior.
 
 O jogador perde seu combo/pontuação atual (pontuação volta para zero)
    ```
 
    ```bash
    🏅 Ranking das 5 maiores pontuações
+Ao sair da partida com [Q], o melhor score do jogador é:
+Comparado com o que já existe no ranking para aquele nome.
+Atualizado se for maior.
+
 Sempre que o jogador perde a pontuação, o valor final é registrado no ranking.
 
 O ranking guarda as 5 maiores pontuações já atingidas.
 
-O ranking é mostrado em uma tela própria, permitindo que o jogador tente bater seus próprios recordes.
+No menu principal, existe a opção “Ver ranking”, o ranking é mostrado em uma tela própria, permitindo que o jogador tente bater seus próprios recordes.
    ```
 
 Esse sistema cria um loop divertido: jogar, pontuar, errar, tentar bater o recorde anterior.
@@ -133,7 +161,7 @@ Esse sistema cria um loop divertido: jogar, pontuar, errar, tentar bater o recor
 
 ---
 
-## 🧰 Como Executar o Projeto
+## 🧰 Como compilar e executar
 
 1. **Clone este repositório:**
 
@@ -142,7 +170,45 @@ Esse sistema cria um loop divertido: jogar, pontuar, errar, tentar bater o recor
 
    ```
 
-2. **Baixe a biblioteca CLI-lib:**
+2. **Abra o terminal:**
+ ---------------------------------
+   Windows (PowerShell / CMD, com MinGW instalado)
+   Certifique-se de que o gcc está instalado (via MinGW ou similar) e acessível no Prompt de Comando ou PowerShell.
    ```bash
-   git clone https://github.com/tgfb/cli-lib.git
+   cd C:\Users\SeuUsuario\Desktop\PIF\projeto
    ```
+   No diretório raiz do projeto, execute(para compilar):
+   ```bash
+   gcc src\main.c src\game.c src\logic.c src\ranking.c src\screen.c src\keyboard.c src\timer.c -Iinclude -Wall -Werror -g -o build\pong-logico.exe
+   ```
+   Para executar o jogo:
+   ```bash
+   .\build\pong-logico.exe
+   ```
+
+
+   ---------------------------------
+
+   Linux / macOS (sem make):
+   ```bash
+   cd /caminho/para/o/projeto
+   ```
+   ```bash
+    gcc src/*.c -Iinclude -Wall -Werror -g -o build/pong-logico
+   ```
+   ```bash
+    ./build/pong-logico
+   ```
+  ---------------------------------
+
+  Linux / macOS (com make):
+   ```bash
+  cd /caminho/para/o/projeto
+   ```
+   ```bash
+     make
+   ```
+   ```bash
+     make run
+   ```
+    
